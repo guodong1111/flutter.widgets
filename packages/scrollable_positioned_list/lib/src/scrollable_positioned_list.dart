@@ -51,6 +51,7 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
+    this.findChildIndexCallback,
   })  : assert(itemCount != null),
         assert(itemBuilder != null),
         itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
@@ -78,6 +79,7 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
+    this.findChildIndexCallback,
   })  : assert(itemCount != null),
         assert(itemBuilder != null),
         assert(separatorBuilder != null),
@@ -170,6 +172,16 @@ class ScrollablePositionedList extends StatefulWidget {
   /// in builds of widgets that would otherwise already be built in the
   /// cache extent.
   final double? minCacheExtent;
+
+  /// Called to find the new index of a child based on its key in case of reordering.
+  ///
+  /// If not provided, a child widget may not map to its existing [RenderObject]
+  /// when the order in which children are returned from [builder] changes.
+  /// This may result in state-loss.
+  ///
+  /// This callback should take an input [Key], and it should return the
+  /// index of the child element with that associated key, or null if not found.
+  final ChildIndexGetter? findChildIndexCallback;
 
   @override
   State<StatefulWidget> createState() => _ScrollablePositionedListState();
@@ -350,6 +362,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
                     child: PositionedList(
                       itemBuilder: widget.itemBuilder,
                       separatorBuilder: widget.separatorBuilder,
+                      findChildIndexCallback: widget.findChildIndexCallback,
                       itemCount: widget.itemCount,
                       positionedIndex: primary.target,
                       controller: primary.scrollController,
@@ -380,6 +393,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
                       child: PositionedList(
                         itemBuilder: widget.itemBuilder,
                         separatorBuilder: widget.separatorBuilder,
+                        findChildIndexCallback: widget.findChildIndexCallback,
                         itemCount: widget.itemCount,
                         itemPositionsNotifier: secondary.itemPositionsNotifier,
                         positionedIndex: secondary.target,

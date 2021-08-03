@@ -28,8 +28,10 @@ class RegistryWidget extends StatefulWidget {
 /// [RegistryWidget].
 class RegisteredElementWidget extends ProxyWidget {
   /// Creates a [RegisteredElementWidget].
-  const RegisteredElementWidget({Key? key, required Widget child})
+  const RegisteredElementWidget(this.index, {Key? key, required Widget child})
       : super(key: key, child: child);
+
+  final int index;
 
   @override
   Element createElement() => _RegisteredElement(this);

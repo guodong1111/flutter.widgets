@@ -30,6 +30,7 @@ class PositionedList extends StatefulWidget {
     required this.itemCount,
     required this.itemBuilder,
     this.separatorBuilder,
+    this.findChildIndexCallback,
     this.controller,
     this.itemPositionsNotifier,
     this.positionedIndex = 0,
@@ -59,6 +60,16 @@ class PositionedList extends StatefulWidget {
   /// If not null, called to build separators for between each item in the list.
   /// Called with 0 <= index < itemCount - 1.
   final IndexedWidgetBuilder? separatorBuilder;
+
+  /// Called to find the new index of a child based on its key in case of reordering.
+  ///
+  /// If not provided, a child widget may not map to its existing [RenderObject]
+  /// when the order in which children are returned from [builder] changes.
+  /// This may result in state-loss.
+  ///
+  /// This callback should take an input [Key], and it should return the
+  /// index of the child element with that associated key, or null if not found.
+  final ChildIndexGetter? findChildIndexCallback;
 
   /// An object that can be used to control the position to which this scroll
   /// view is scrolled.
@@ -193,6 +204,7 @@ class _PositionedListState extends State<PositionedList> {
                     addSemanticIndexes: false,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
                     addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                    findChildIndexCallback: widget.findChildIndexCallback,
                   ),
                 ),
               ),
@@ -209,6 +221,7 @@ class _PositionedListState extends State<PositionedList> {
                   addSemanticIndexes: false,
                   addRepaintBoundaries: widget.addRepaintBoundaries,
                   addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                  findChildIndexCallback: widget.findChildIndexCallback,
                 ),
               ),
             ),
@@ -228,6 +241,7 @@ class _PositionedListState extends State<PositionedList> {
                     addSemanticIndexes: false,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
                     addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                    findChildIndexCallback: widget.findChildIndexCallback,
                   ),
                 ),
               ),
@@ -244,12 +258,14 @@ class _PositionedListState extends State<PositionedList> {
   }
 
   Widget _buildItem(int index) {
+    final Widget child = widget.itemBuilder(context, index);
     return RegisteredElementWidget(
-      key: ValueKey(index),
+      index,
+      key: child.key ?? ValueKey<int>(index),
       child: widget.addSemanticIndexes
           ? IndexedSemantics(
-              index: index, child: widget.itemBuilder(context, index))
-          : widget.itemBuilder(context, index),
+              index: index, child: child)
+          : child,
     );
   }
 
@@ -327,14 +343,14 @@ class _PositionedListState extends State<PositionedList> {
             anchor = viewport.anchor;
           }
 
-          final ValueKey<int> key = element.widget.key as ValueKey<int>;
+          final RegisteredElementWidget elementWidget = element.widget as RegisteredElementWidget;
           if (widget.scrollDirection == Axis.vertical) {
             final reveal = viewport!.getOffsetToReveal(box, 0).offset;
             if (!reveal.isFinite) continue;
             final itemOffset =
                 reveal - viewport.offset.pixels + anchor * viewport.size.height;
             positions.add(ItemPosition(
-                index: key.value,
+                index: elementWidget.index,
                 itemLeadingEdge: itemOffset.round() /
                     scrollController.position.viewportDimension,
                 itemTrailingEdge: (itemOffset + box.size.height).round() /
@@ -343,7 +359,7 @@ class _PositionedListState extends State<PositionedList> {
             final itemOffset =
                 box.localToGlobal(Offset.zero, ancestor: viewport).dx;
             positions.add(ItemPosition(
-                index: key.value,
+                index: elementWidget.index,
                 itemLeadingEdge: (widget.reverse
                             ? scrollController.position.viewportDimension -
                                 (itemOffset + box.size.width)
