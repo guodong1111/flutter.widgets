@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'element_registry.dart';
+import 'expanded_viewport.dart';
 import 'item_positions_listener.dart';
 import 'item_positions_notifier.dart';
 import 'scroll_view.dart';
@@ -186,9 +187,11 @@ class _PositionedListState extends State<PositionedList> {
           reverse: widget.reverse,
           cacheExtent: widget.cacheExtent,
           physics: widget.physics,
+          expanded: widget.reverse && 0 == widget.positionedIndex,
           shrinkWrap: widget.shrinkWrap,
           semanticChildCount: widget.semanticChildCount ?? widget.itemCount,
           slivers: <Widget>[
+            if (widget.reverse) SliverExpanded(),
             if (widget.positionedIndex > 0)
               SliverPadding(
                 padding: _leadingSliverPadding,
