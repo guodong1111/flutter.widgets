@@ -204,7 +204,13 @@ class _PositionedListState extends State<PositionedList> {
                     addSemanticIndexes: false,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
                     addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-                    findChildIndexCallback: widget.findChildIndexCallback,
+                    findChildIndexCallback: (Key key) {
+                      int? index = widget.findChildIndexCallback?.call(key);
+                      if (null != index) {
+                        index = widget.positionedIndex - (index + 1);
+                      }
+                      return index;
+                    },
                   ),
                 ),
               ),
@@ -221,6 +227,13 @@ class _PositionedListState extends State<PositionedList> {
                   addSemanticIndexes: false,
                   addRepaintBoundaries: widget.addRepaintBoundaries,
                   addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                  findChildIndexCallback: (Key key) {
+                    int? index = widget.findChildIndexCallback?.call(key);
+                    if (null != index) {
+                      index -= widget.positionedIndex;
+                    }
+                    return index;
+                  },
                 ),
               ),
             ),
@@ -240,7 +253,13 @@ class _PositionedListState extends State<PositionedList> {
                     addSemanticIndexes: false,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
                     addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-                    findChildIndexCallback: _findChildIndexCallback,
+                    findChildIndexCallback: (Key key) {
+                      int? index = widget.findChildIndexCallback?.call(key);
+                      if (null != index) {
+                        index -= widget.positionedIndex + 1;
+                      }
+                      return index;
+                    },
                   ),
                 ),
               ),
@@ -266,19 +285,6 @@ class _PositionedListState extends State<PositionedList> {
               index: index, child: child)
           : child,
     );
-  }
-
-  int? _findChildIndexCallback(Key key) {
-    int? index = widget.findChildIndexCallback?.call(key);
-    if (null != index) {
-      if (widget.positionedIndex > 0) {
-        index -= widget.separatorBuilder == null
-            ? widget.positionedIndex
-            : 2 * widget.positionedIndex;
-      }
-      index -= 1;
-    }
-    return index;
   }
 
   EdgeInsets get _leadingSliverPadding =>
