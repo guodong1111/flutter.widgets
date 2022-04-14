@@ -38,6 +38,7 @@ class ScrollablePositionedList extends StatefulWidget {
     required this.itemBuilder,
     Key? key,
     this.itemScrollController,
+    this.scrollController,
     this.shrinkWrap = false,
     ItemPositionsListener? itemPositionsListener,
     this.initialScrollIndex = 0,
@@ -67,6 +68,7 @@ class ScrollablePositionedList extends StatefulWidget {
     Key? key,
     this.shrinkWrap = false,
     this.itemScrollController,
+    this.scrollController,
     ItemPositionsListener? itemPositionsListener,
     this.initialScrollIndex = 0,
     this.initialAlignment = 0,
@@ -99,6 +101,8 @@ class ScrollablePositionedList extends StatefulWidget {
 
   /// Controller for jumping or scrolling to an item.
   final ItemScrollController? itemScrollController;
+
+  final ScrollController? scrollController;
 
   /// Notifier that reports the items laid out in the list after each frame.
   final ItemPositionsNotifier? itemPositionsNotifier;
@@ -270,7 +274,7 @@ class ItemScrollController {
 class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     with TickerProviderStateMixin {
   /// Details for the primary (active) [ListView].
-  var primary = _ListDisplayDetails(const ValueKey('Ping'));
+  late var primary = _ListDisplayDetails(const ValueKey('Ping'), scrollController: widget.scrollController);
 
   /// Details for the secondary (transitional) [ListView] that is temporarily
   /// shown when scrolling a long distance.
@@ -449,7 +453,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     }
     if (_isTransitioning) {
       _stopScroll(canceled: true);
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+      SchedulerBinding.instance?.addPostFrameCallback((_) {
         _startScroll(
           index: index,
           alignment: alignment,
@@ -496,7 +500,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
       final startCompleter = Completer<void>();
       final endCompleter = Completer<void>();
       startAnimationCallback = () {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
+        SchedulerBinding.instance?.addPostFrameCallback((_) {
           startAnimationCallback = () {};
 
           opacity.parent = _opacityAnimation(opacityAnimationWeights).animate(
@@ -587,10 +591,12 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
 }
 
 class _ListDisplayDetails {
-  _ListDisplayDetails(this.key);
+  _ListDisplayDetails(this.key, {ScrollController? scrollController}) {
+    this.scrollController = scrollController ?? ScrollController(keepScrollOffset: false);
+  }
 
   final itemPositionsNotifier = ItemPositionsNotifier();
-  final scrollController = ScrollController(keepScrollOffset: false);
+  late final ScrollController scrollController;
 
   /// The index of the item to scroll to.
   int target = 0;
