@@ -373,26 +373,26 @@ class _PositionedListState extends State<PositionedList> {
             positions.add(ItemPosition(
                 index: elementWidget.index,
                 itemLeadingEdge: itemOffset.round() /
-                    scrollController.position.viewportDimension,
+                    scrollController.positions.first.viewportDimension,
                 itemTrailingEdge: (itemOffset + box.size.height).round() /
-                    scrollController.position.viewportDimension));
+                    scrollController.positions.first.viewportDimension));
           } else {
             final itemOffset =
                 box.localToGlobal(Offset.zero, ancestor: viewport).dx;
             positions.add(ItemPosition(
                 index: elementWidget.index,
                 itemLeadingEdge: (widget.reverse
-                            ? scrollController.position.viewportDimension -
+                            ? scrollController.positions.first.viewportDimension -
                                 (itemOffset + box.size.width)
                             : itemOffset)
                         .round() /
-                    scrollController.position.viewportDimension,
+                    scrollController.positions.first.viewportDimension,
                 itemTrailingEdge: (widget.reverse
-                            ? scrollController.position.viewportDimension -
+                            ? scrollController.positions.first.viewportDimension -
                                 itemOffset
                             : (itemOffset + box.size.width))
                         .round() /
-                    scrollController.position.viewportDimension));
+                    scrollController.positions.first.viewportDimension));
           }
         }
         widget.itemPositionsNotifier?.itemPositions.value = positions;
