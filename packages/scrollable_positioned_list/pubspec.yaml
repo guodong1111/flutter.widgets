@@ -6,12 +6,12 @@ homepage: https://github.com/google/flutter.widgets/tree/master/packages/scrolla
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
-  flutter: '>=2.12.0'
+  flutter: '>=2.10.5'
 
 dependencies:
   flutter:
     sdk: flutter
-  collection: ^1.16.0
+  collection: ^1.15.0
 
 dev_dependencies:
   pedantic: ^1.10.0-0
